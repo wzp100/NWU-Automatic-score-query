@@ -56,7 +56,7 @@ class Student:
     # 获取公钥密码
     def get_public_key(self):
         result = None
-        result = self.sessions.get(self.KeyUrl + str(self.time)).json()
+        result = self.sessions.get(self.KeyUrl + str(self.time),verify=False).json()
         self.modules = result["modulus"]
         # 说实话 这也太那啥了 这居然是没用的 怪不得去年栽在这里
         # self.exponent = result["exponent"]
