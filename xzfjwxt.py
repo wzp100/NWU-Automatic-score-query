@@ -2,7 +2,6 @@
 import binascii
 import requests
 from bs4 import BeautifulSoup
-import time
 import sys
 import rsa
 import json
@@ -15,7 +14,6 @@ from email.mime.text import MIMEText
 
 class Student:
 
-
     def __init__(self, config_json, ed_system):
         self.pub = None
         self.token = None
@@ -23,9 +21,9 @@ class Student:
         self.cookie = None
         self.modules = None
         self.request = None
-        
+
         # 定义一个暂时变量，存放查询后的成绩数目，一遍与之前的比较
-        self.temp_number_of_scores =None
+        self.temp_number_of_scores = None
 
         self.year = str(config_json['temp_year'])
         # 将配置中的学期转换为关键词,0为第一学期,1为第二学期
@@ -38,25 +36,24 @@ class Student:
         self.name = str(config_json['stu_name']).encode("utf8").decode("utf8")
         self.password = str(config_json['stu_password']).encode("utf8").decode("utf8")
         self.temp_password = self.password
-        self.url =  ed_system.url
+        self.url = ed_system.url
         self.KeyUrl = ed_system.key_url
         self.gradeUrl = ed_system.grade_url
         self.chongxiuUrl = ed_system.chongxiu_url
         self.login()
 
     # 设置当前的学期0：第一学期，1：第二学期
-    def setup_term(self,term_key):
+    def setup_term(self, term_key):
         self.term_key = str(term_key)
-        if  self.term_key=="1":
-            self.term = "3"# 第一学期
-        elif self.term_key=="2":
-            self.term = "12"# 第二学期
-
+        if self.term_key == "1":
+            self.term = "3"  # 第一学期
+        elif self.term_key == "2":
+            self.term = "12"  # 第二学期
 
     # 获取公钥密码
     def get_public_key(self):
         result = None
-        result = self.sessions.get(self.KeyUrl + str(self.time),verify=False).json()
+        result = self.sessions.get(self.KeyUrl + str(self.time), verify=False).json()
         self.modules = result["modulus"]
         # 说实话 这也太那啥了 这居然是没用的 怪不得去年栽在这里
         # self.exponent = result["exponent"]
@@ -78,10 +75,11 @@ class Student:
         key = rsa.PublicKey(int(rsa_n, 16), weibo_rsa_e)
         encropy_pwd = rsa.encrypt(message, key)
         self.password = binascii.b2a_base64(encropy_pwd)
+
     # 登录函数
     def login(self):
         self.sessions = requests.Session()
-        self.time = int(time.time())        
+        self.time = int(time.time())
         self.get_public_key()
         self.get_csrf_token()
         self.process_public()
@@ -113,14 +111,13 @@ class Student:
             print(str(e))
             sys.exit()
 
-
     # 请求重修数据
     def post_grade_chongxiu_data(self):
         try:
             payload = {
                 "cxxnm": "2021",  # 学年
                 "cxxqm": self.term,  # 学期3为上学期,12为下学期
-                #"cxxqm": "",  # 学期3为上学期,12为下学期
+                # "cxxqm": "",  # 学期3为上学期,12为下学期
                 "pc": "1",  # 页码
                 "njdm_id": "2019",  # 年级代码
                 "kkbm_id": "",  # 可选
@@ -142,8 +139,8 @@ class Student:
             }
             print(f"开始获取第{self.term_key}学期重修数据")
             self.request = self.sessions.post(self.chongxiuUrl, data=payload, headers=self.header).json()
-            
-            #print(self.request)
+
+            # print(self.request)
             return self.request
         except Exception as e:
             print(str(e))
@@ -151,26 +148,24 @@ class Student:
 
     # 请求重修成绩,自动化完成成绩的获取
     def get_chongxiu_grade(self):
-        #首先进行登录
+        # 首先进行登录
         self.login
         # 设置查询的学期
         self.setup_term("1")
 
         temp_response_json = self.post_grade_chongxiu_data()
         # 处理响应数据
-        info_of_score, self.temp_number_of_scores = temp_system.handle_response(temp_response_json,stu)
+        info_of_score, self.temp_number_of_scores = temp_system.handle_response(temp_response_json, stu)
         # 获得表格
-        temp_system.get_table(info_of_score,stu)
+        temp_system.get_table(info_of_score, stu)
         # 发送推送
         stu.setup_term("2")
         temp_response_json = stu.post_grade_chongxiu_data()
         # 处理响应数据
-        info_of_score, self.temp_number_of_scores = temp_system.handle_response(temp_response_json,stu)
+        info_of_score, self.temp_number_of_scores = temp_system.handle_response(temp_response_json, stu)
         # 获得表格
-        temp_system.get_table(info_of_score,stu)   
+        temp_system.get_table(info_of_score, stu)
         # 发送推送
-
-
 
 
 class eduction_sysem:
@@ -183,15 +178,13 @@ class eduction_sysem:
     # 获取成绩路径
     grade_url = "https://jwgl.nwu.edu.cn/jwglxt/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=N305005"
 
-
-
-    def __init__(self,config_json):
-        self.stuID=config_json['stu_name']
-    # 重修网站路径
+    def __init__(self, config_json):
+        self.stuID = config_json['stu_name']
+        # 重修网站路径
         self.chongxiu_url = f"https://jwgl.nwu.edu.cn/jwglxt/cxbm/cxbm_cxXscxbmList.html?gnmkdm=N1056&su={self.stuID}"
 
     # 处理json，返回成绩数据
-    def handle_response(self,response_json,student):
+    def handle_response(self, response_json, student):
         global number_of_scores
         # 解析响应数据
         json_data_list = response_json['items']
@@ -228,11 +221,11 @@ class eduction_sysem:
         if debug_status:
             print("解析成功,共计{}条成绩".format(number_of_scores))
         # 判断当前学期
-        if student.term_key=="1":
+        if student.term_key == "1":
             self.term_0_number = temp_number_of_data
             self.number_of_scores_last = student.term_0_chongxiu_grade_number
 
-        elif student.term_key=="2":
+        elif student.term_key == "2":
             self.term_1_number = temp_number_of_data
             self.number_of_scores_last = student.term_1_chongxiu_grade_number
 
@@ -243,17 +236,17 @@ class eduction_sysem:
             self.data_is_change = True
             self.number_of_scores_last = temp_number_of_data
         score_data.sort(key=lambda ele: ele[1], reverse=True)
-        
+
         return score_data, temp_number_of_data
 
     # 获得表格数据
-    def get_table(self,data_of_scores,student):
+    def get_table(self, data_of_scores, student):
         global number_of_scores
         mat = "{:30}\t{:20}"
-        str1 = mat.format("课程名称","课程成绩") +"\n"
-        print(mat.format("课程名称","课程成绩"))
+        str1 = mat.format("课程名称", "课程成绩") + "\n"
+        print(mat.format("课程名称", "课程成绩"))
         for i in data_of_scores:
-            str1 = str1 + mat.format(i[0],i[1])+"\n"   
+            str1 = str1 + mat.format(i[0], i[1]) + "\n"
         print(str1)
 
         markdown = str1
@@ -261,29 +254,28 @@ class eduction_sysem:
         if change_notify_status:
             if self.data_is_change:
                 print("有新成绩")
-                if student.term_key=="1":
-                    student.term_0_chongxiu_grade_number=number_of_scores
-                    data_json['term_0_chongxiu_grade_number']=number_of_scores
+                if student.term_key == "1":
+                    student.term_0_chongxiu_grade_number = number_of_scores
+                    data_json['term_0_chongxiu_grade_number'] = number_of_scores
                     markdown = '第一学期重修成绩' + markdown
-                    push_message.push_mail(markdown,f'第一学期重修成绩已更新，共有{number_of_scores}条成绩')
+                    push_message.push_mail(markdown, f'第一学期重修成绩已更新，共有{number_of_scores}条成绩')
 
-                elif student.term_key=="2":
+                elif student.term_key == "2":
                     student.term_1_chongxiu_grade_number = number_of_scores
                     # 将json文件的学期数据保存
-                    data_json['term_1_chongxiu_grade_number']=number_of_scores
+                    data_json['term_1_chongxiu_grade_number'] = number_of_scores
                     markdown = '第二学期重修成绩' + markdown
-                    push_message.push_mail(markdown,f'第二学期重修成绩已更新，共有{number_of_scores}条成绩')              
-              
+                    push_message.push_mail(markdown, f'第二学期重修成绩已更新，共有{number_of_scores}条成绩')
+
             else:
                 if debug_status:
                     print("没有新数据")
         else:
             print("没有新数据")
-            push_message.push_mail(markdown,f'成绩已更新，共有{number_of_scores}条成绩')
+            push_message.push_mail(markdown, f'成绩已更新，共有{number_of_scores}条成绩')
 
         write_back_json(data_json)
         return markdown
-
 
 
 class push_system:
@@ -291,27 +283,26 @@ class push_system:
 
     def __init__(self, config_json):
         self.mail_switch = config_json['mail_switch']
-        if self.mail_switch:     
+        if self.mail_switch:
             self.init_mail(config_json)
             print("邮件服务器开启")
         else:
             print("邮件服务器关闭")
 
-    def init_mail(self,config_json):
+    def init_mail(self, config_json):
         self.sender = config_json['sender']
         self.receiver = config_json['receiver']
         self.mail_host = config_json['mail_host']
         self.mail_user = config_json['mail_user']
         self.mail_pass = config_json['mail_pass']
 
-
-    def push(self,data):
+    def push(self, data):
         if self.mail_switch:
             self.push_mail(data)
 
     # 邮箱推送
 
-    def push_mail(self,data):
+    def push_mail(self, data):
         global number_of_scores
         print("开始发送邮件")
         # 设置email信息
@@ -340,8 +331,8 @@ class push_system:
         except smtplib.SMTPException as e:
             print("邮件发送失败", e)
 
-    #带标题的推送
-    def push_mail(self,data,title):
+    # 带标题的推送
+    def push_mail(self, data, title):
         global number_of_scores
         print("开始发送邮件")
         # 设置email信息
@@ -377,30 +368,21 @@ def get_json():
     f.close
     return config_json
 
+
 def write_back_json(json_dict):
     with open('config.json', 'w', encoding='utf-8') as f:
-        json.dump(json_dict, f,indent=2,sort_keys=True, ensure_ascii=False)
+        json.dump(json_dict, f, indent=2, sort_keys=True, ensure_ascii=False)
     f.close
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-
     print("重修成绩查询程序启动")
     # 获取配置文件
     data_json = get_json()
     # 获取配置文件中的数据
-    #print(data_json)
+    # print(data_json)
 
     number_of_scores = 0
-
 
     # 登陆~
     # 初始化系统
@@ -409,7 +391,7 @@ if __name__ == '__main__':
     stu = Student(data_json, temp_system)
     # 初始化消息推送
     push_message = push_system(data_json)
-    
+
     # 循环模式状态
     repeat_status = False
     # 打开推送
@@ -420,4 +402,3 @@ if __name__ == '__main__':
     # 系统日志debug模式
     debug_status = True
     stu.get_chongxiu_grade()
-
