@@ -1,0 +1,15 @@
+{
+  "host": "jwgl.nwu.edu.cn",
+  "mail_host": "邮箱地址",
+  "mail_pass": "邮箱密码",
+  "mail_switch": true,
+  "mail_user": "邮箱用户名",
+  "receiver": "接收邮箱地址",
+  "sender": "发送邮箱地址",
+  "stu_name": "教务系统用户名",
+  "stu_password": "教务系统密码",
+  "temp_term": "1",
+  "temp_year": "2020",
+  "term_0_chongxiu_grade_number": 0,
+  "term_1_chongxiu_grade_number": 0
+}

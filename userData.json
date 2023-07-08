@@ -3,5 +3,6 @@
   "lower_term_grade_num": 0,
   "name": "",
   "password": "",
-  "upper_term_grade_num": 0
+  "upper_term_grade_num": 0,
+  "school_year": ""
 }

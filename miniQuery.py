@@ -193,7 +193,6 @@ class AAMSystem:
             data = {
                 'csrftoken': self.encry_info.token,
                 'mm': self.encry_info.password,
-                'mm': self.encry_info.password,
                 'yhm': student.stu_ID
             }
             request = self.sessions.post(url=AAMSystem.url, headers=self.header,
@@ -332,7 +331,11 @@ class AAMSystem:
 
 if __name__ == '__main__':
     print("重修成绩查询程序启动")
-    configName = 'userData.json'
+    test = True
+    if test:
+        configName = 'test.json'
+    else:
+        configName = 'userData.json'
     # 获取配置文件
     dataJson = get_json(configName)
     # 获取配置文件中的数据
