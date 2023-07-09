@@ -148,6 +148,7 @@ class AAMSystem:
         # 检测是否登录
         self.check_login()
         # 首先获取第一学期的重修数据
+        # TODO: 将函数打包为一个函数，然后上下学期的数据都可以用这个函数来获取
         print("正在获取第一学期的重修数据")
         temp_response_json = self.post_grade_chongxiu_data(UPPER_TERM)
         # 处理响应数据
@@ -167,42 +168,23 @@ class AAMSystem:
         self.student.lower_term_grade_table = self.get_table(self.student.lower_term_grade)
         return self.student
 
+    # TODO: 重构代码
+    # 获得某个学期的成绩数据
+    def get_term_grade(self, term: str):
+        temp_response_json = self.post_grade_chongxiu_data(term)
+        # 处理响应数据
+        temp_grade, temp_grade_num = self.handle_response(temp_response_json)
+
+
+
     # 处理json，返回成绩数据
     @staticmethod
     def handle_response(response_json):
         # 解析响应数据
         grade_items = response_json['items']
-        temp_number_of_data = 0
         score_data = []
-        # for i in json_data_list:
-        #     # 将无用信息去除
-        #     temp_str = i['kcmc']
-        #     temp_str = re.sub('<br>', '\n', temp_str)
-        #     temp_str = re.sub(r'$', '\n', temp_str)
-        #     temp_str = temp_str.replace('课程代码：', '')
-        #     temp_str = temp_str.replace('学分：', '')
-        #     temp_str = temp_str.replace('正考成绩：', '')
-        #     # 将数据分开
-        #     temp_iter = re.findall(r'.*\n', temp_str)
-        #     # 去除无成绩的数据
-        #     if len(temp_iter) < 4:
-        #         break
-        #     n = 0
-        #     temp_number_of_data = temp_number_of_data + 1
-        #     data_list = []
-        #     # data_list.append(m)#序号
-        #     for j in temp_iter:
-        #         # 跳过
-        #         if n != 1 and n != 2:
-        #             j = re.sub(r'\n', '', j)
-        #             data_list.append(j)
-        #             # print(j)
-        #         n = n + 1
-        #     score_data.append(data_list)
         for temp_item in grade_items:
             try:
-                # print((i['kcmc'].split("<br>"))[0] +"  "+i['cj'] + "  " + i['kcm'])
-                # print(temp_item['kcmc'].split("<br>")[0] + "  " + "ceshi" + temp_item['cj'] + "  " + temp_item['kch'])
                 score_data.append([temp_item['kcmc'].split("<br>")[0], temp_item['cj'], temp_item['kch']])
             except KeyError:
                 pass
@@ -248,12 +230,19 @@ class AAMSystem:
             print(f"重修数据有{sub_num}条减少,请检查当前查询的学年是否正确")
         return sub_num
 
-
-
+    # 通过单个课程代码查询学生保存的成绩中数据是否存在
+    def search_grade_by_lesson_code(self, lesson_code ) -> bool:
+        if (lesson_code in self.student.upper_term_grade.keys()) or \
+                (lesson_code in self.student.lower_term_grade.keys()):
+            return True
+        return False
+    # TODO: 继续完成重复成绩的判定，判定后根据结果是否要添加到总的重修成绩中，并且单独保存新的成绩，并想办法单独显示出来
     # 登出系统
     def logout(self):
         self.sessions.close()
         self.__init__()
+
+
 
 
     # 退出系统

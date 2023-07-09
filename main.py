@@ -33,7 +33,7 @@ def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
 
 if __name__ == '__main__':
     print("重修成绩查询程序启动")
-    test = True
+    test = False
     if test:
         configName = 'test.json'
     else:
