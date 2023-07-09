@@ -279,6 +279,7 @@ class AAMSystem:
             key_word = r'用户名或密码不正确'
             if re.findall(key_word, request.text):
                 print('用户名或密码错误,请查验..')
+                student.input_stu_ID_and_password()
                 return False
             else:
                 self.login_status = True
@@ -451,7 +452,7 @@ def get_chongxiu_grade(system: AAMSystem, stu: Student, configName: str):
 
 if __name__ == '__main__':
     print("重修成绩查询程序启动")
-    test = False
+    test = True
     if test:
         configName = 'test.json'
     else:

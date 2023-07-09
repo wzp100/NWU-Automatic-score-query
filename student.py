@@ -9,6 +9,10 @@ class Student:
     # 初始化学生类
     def __init__(self) -> None:
         # 定义一个暂时变量，存放查询后的成绩数目，一遍与之前的比较
+        self.lower_term_name_dic = None
+        self.lower_term_grade_dic = None
+        self.upper_term_name_dic = None
+        self.upper_term_grade_dic = None
         self.config_name = None
         self.config_json = {}
         self.upper_term_grade_num = 0
@@ -59,20 +63,54 @@ class Student:
         self.password = input("密码：")
         self.school_year = input("入学年份（例如2022）：")
 
+
     # 保存学生信息
     def save_student_info(self, file_name):
+        self.get_term_grade_dic()
         self.config_json['upper_term_grade_num'] = self.upper_term_grade_num
         self.config_json['lower_term_grade_num'] = self.lower_term_grade_num
         self.config_json['school_year'] = self.school_year
         self.config_json['name'] = self.name
         self.config_json['id'] = self.stu_ID
         self.config_json['password'] = self.password
+        self.config_json['upper_term_grade_dic'] = self.upper_term_grade_dic
+        self.config_json['upper_term_name_dic'] = self.upper_term_name_dic
+        self.config_json['lower_term_grade_dic'] = self.lower_term_grade_dic
+        self.config_json['lower_term_name_dic'] = self.lower_term_name_dic
         json_utils.write_back_json(self.config_json, file_name)
         return self.config_json
 
     # 更改学年
     def change_school_year(self, year):
         self.school_year = year
+
+    # 保存学期成绩
+    @staticmethod
+    def save_term_grade_to_dic(term_grade:list):
+        # 首先创建一个课程代码为key，课程成绩为value的字典
+        grade_dic = {}
+        # 遍历课程成绩列表
+        for i in term_grade:
+            # 将课程代码作为key，课程成绩作为value，存入字典
+            grade_dic[i[2]] = i[1]
+        # 返回字典
+        # 接着创建一个课程代码为key，课程名称为value的字典
+        name_dic = {}
+        # 遍历课程成绩列表
+        for i in term_grade:
+            # 将课程代码作为key，课程名称作为value，存入字典
+            name_dic[i[2]] = i[0]
+        return grade_dic, name_dic
+
+    # 获得上下学期成绩的字典
+    def get_term_grade_dic(self):
+        self.upper_term_grade_dic, self.upper_term_name_dic = self.save_term_grade_to_dic(self.upper_term_grade)
+        self.lower_term_grade_dic, self.lower_term_name_dic = self.save_term_grade_to_dic(self.lower_term_grade)
+        
+
+
+
+
 
     # 打印成绩
     def print_grade(self):

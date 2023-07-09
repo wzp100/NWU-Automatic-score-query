@@ -3,15 +3,15 @@ from student import *
 from utils.json_utils import is_json_exist
 
 # 重修成绩查询
-def get_chongxiu_grade(system: AAMSystem, stu: Student, configName: str):
+def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
     # 系统登录
-    system.login(stu)
+    system.login(student)
     # 成绩查询
-    stu = system.get_chongxiu_grade()
+    student = system.get_chongxiu_grade()
     # 打印成绩
-    stu.print_grade()
+    student.print_grade()
     # 保存数据
-    stu.save_student_info(configName)
+    student.save_student_info(configName)
 
     choice = input("按回车退出，或者按1重新登录，按2更改学年重新查询：")
     if choice == "1":
@@ -21,7 +21,7 @@ def get_chongxiu_grade(system: AAMSystem, stu: Student, configName: str):
     elif choice == "2":
         print("更改学年重新查询")
         year = input("学年（例如2022）：")
-        stu.change_school_year(year)
+        student.change_school_year(year)
         return "2"
     else:
         print("退出程序")

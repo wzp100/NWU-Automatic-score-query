@@ -46,6 +46,7 @@ def create_json():
 
 
 # 写入json文件
-def write_back_json(json_dict, file_name: str) -> None:
+def write_back_json(json_dict: dict, file_name: str) -> bool:
     with open(file_name, 'w', encoding='utf-8') as f:
-        json.dump(json_dict, f, indent=2, sort_keys=True, ensure_ascii=False)
+        json.dump(json_dict, f, indent=2, sort_keys=False, ensure_ascii=False)
+    return True
