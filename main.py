@@ -45,7 +45,7 @@ if __name__ == '__main__':
         # 如果没有配置文件，创建一个
         print("没有配置文件正在创建。。。。")
         stu.input_stu_ID_and_password()
-        stu.save_student_info(configName)
+        stu.save()
     stu.read_config(configName)
     # 初始化系统
     system = AAMSystem()

@@ -151,14 +151,18 @@ class AAMSystem:
         print("正在获取第一学期的重修数据")
         temp_response_json = self.post_grade_chongxiu_data(UPPER_TERM)
         # 处理响应数据
-        self.student.upper_term_grade, self.student.upper_term_grade_num = self.handle_response(temp_response_json)
+        self.student.upper_term_grade, temp_upper_term_grade_num = self.handle_response(temp_response_json)
+        self.compare_grade_num(self.student.upper_term_grade_num, temp_upper_term_grade_num)
+        self.student.upper_term_grade_num = temp_upper_term_grade_num
         # 获得表格
         self.student.upper_term_grade_table = self.get_table(self.student.upper_term_grade)
         # 获取第二学期的重修数据
         print("正在获取第二学期的重修数据")
         temp_response_json = self.post_grade_chongxiu_data(LOWER_TERM)
         # 处理响应数据
-        self.student.lower_term_grade, self.student.lower_term_grade_num = self.handle_response(temp_response_json)
+        self.student.lower_term_grade, temp_lower_term_grade_num = self.handle_response(temp_response_json)
+        self.compare_grade_num(self.student.lower_term_grade_num, temp_lower_term_grade_num)
+        self.student.lower_term_grade_num = temp_lower_term_grade_num
         # 获得表格
         self.student.lower_term_grade_table = self.get_table(self.student.lower_term_grade)
         return self.student
@@ -227,6 +231,24 @@ class AAMSystem:
     #     # 保存第二学期的重修成绩数量数据
     #     data_json['lower_term_grade_num'] = self.student.lower_term_grade_num
     #     json_utils.write_back_json(data_json, file_name)
+
+    # 比对学生的保存成绩数量与当前成绩数量是否一致，并返回两者的差值
+    @staticmethod
+    def compare_grade_num(old_num: int, new_num: int ) -> int:
+        sub_num = new_num - old_num
+        if old_num == 0:
+            print("第一次查询重修数据")
+            return sub_num
+        # 比对成绩数量
+        if sub_num == 0:
+            print("重修数据没有更新")
+        elif sub_num > 0:
+            print(f"重修数据有{sub_num}条更新")
+        else:
+            print(f"重修数据有{sub_num}条减少,请检查当前查询的学年是否正确")
+        return sub_num
+
+
 
     # 登出系统
     def logout(self):
