@@ -33,7 +33,7 @@ def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
 
 if __name__ == '__main__':
     print("重修成绩查询程序启动")
-    test = False
+    test = True
     if test:
         configName = 'test.json'
     else:
@@ -45,8 +45,9 @@ if __name__ == '__main__':
         # 如果没有配置文件，创建一个
         print("没有配置文件正在创建。。。。")
         stu.input_stu_ID_and_password()
-        stu.save()
-    stu.read_config(configName)
+        stu.save_student_info(configName)
+    else:
+        stu.read_config(configName)
     # 初始化系统
     system = AAMSystem()
     while True:

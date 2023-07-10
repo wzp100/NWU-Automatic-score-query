@@ -51,15 +51,20 @@ class Student:
         try:
             self.upper_term_grade_num = config_json['upper_term_grade_num']  # 上学期成绩数目
             self.lower_term_grade_num = config_json['lower_term_grade_num']  # 下学期成绩数目
-            self.school_year = config_json['school_year']  # 入学年份
             self.name = config_json['name']  # 学生姓名
+            self.term_grade_dic = config_json['term_grade_dic']  # 学生课程成绩字典
+        except KeyError:
+            pass
+        # 仅当必要的数据缺失时才会重新填写
+        try:
             self.stu_ID = config_json['id']  # 学生学号
             self.password = config_json['password']  # 学生密码
-            self.term_grade_dic = config_json['term_grade_dic']  # 学生课程成绩字典
+            self.school_year = config_json['school_year']  # 入学年份
         except KeyError:
             print("配置文件中缺少信息，请重新输入")
             self.input_stu_ID_and_password()
             self.save_student_info(config_name)
+
 
     # 输入学号和密码
     def input_stu_ID_and_password(self):
@@ -68,11 +73,11 @@ class Student:
         self.password = input("密码：")
         self.school_year = input("入学年份（例如2022）：")
 
-    # 保存
+    # 保存,保存在相同的文件下
     def save(self):
         self.save_student_info(self.config_name)
 
-    # 保存学生信息
+    # 保存学生信息，另存为信息
     def save_student_info(self, file_name):
         self.get_term_grade_dic()
         self.config_json['school_year'] = self.school_year
@@ -94,6 +99,9 @@ class Student:
     def save_term_grade_to_dic(term_grade:list):
         # 首先创建一个课程代码为key，课程成绩为value的字典
         grade_dic = {}
+        # 判断term_grade 是否为空
+        if term_grade is None:
+            return grade_dic
         # 遍历课程成绩列表
         for i in term_grade:
             # 将课程代码作为key，课程名称与成绩作为value，存入字典
