@@ -96,7 +96,8 @@ class AAMSystem:
             key_word = r'用户名或密码不正确'
             if re.findall(key_word, request.text):
                 print('用户名或密码错误,请查验..')
-                sys.exit()
+                self.student.input_stu_ID_and_password()
+                self.student.save_student_info(self.student.config_name)
                 return False
             else:
                 self.login_status = True
@@ -237,6 +238,7 @@ class AAMSystem:
             return True
         return False
     # TODO: 继续完成重复成绩的判定，判定后根据结果是否要添加到总的重修成绩中，并且单独保存新的成绩，并想办法单独显示出来
+
     # 登出系统
     def logout(self):
         self.sessions.close()
