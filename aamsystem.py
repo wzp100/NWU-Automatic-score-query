@@ -149,34 +149,48 @@ class AAMSystem:
         # 检测是否登录
         self.check_login()
         # 首先获取第一学期的重修数据
-        # TODO: 将函数打包为一个函数，然后上下学期的数据都可以用这个函数来获取
-        print("正在获取第一学期的重修数据")
-        temp_response_json = self.post_grade_chongxiu_data(UPPER_TERM)
-        # 处理响应数据
-        self.student.upper_term_grade, temp_upper_term_grade_num = self.handle_response(temp_response_json)
-        self.compare_grade_num(self.student.upper_term_grade_num, temp_upper_term_grade_num)
-        self.student.upper_term_grade_num = temp_upper_term_grade_num
-        # 获得表格
-        self.student.upper_term_grade_table = self.get_table(self.student.upper_term_grade)
-        # 获取第二学期的重修数据
-        print("正在获取第二学期的重修数据")
-        temp_response_json = self.post_grade_chongxiu_data(LOWER_TERM)
-        # 处理响应数据
-        self.student.lower_term_grade, temp_lower_term_grade_num = self.handle_response(temp_response_json)
-        self.compare_grade_num(self.student.lower_term_grade_num, temp_lower_term_grade_num)
-        self.student.lower_term_grade_num = temp_lower_term_grade_num
-        # 获得表格
-        self.student.lower_term_grade_table = self.get_table(self.student.lower_term_grade)
+        # 将函数打包为一个函数，然后上下学期的数据都可以用这个函数来获取
+        # print("正在获取第一学期的重修数据")
+        # temp_response_json = self.post_grade_chongxiu_data(UPPER_TERM)
+        # # 处理响应数据
+        # self.student.upper_term_grade, temp_upper_term_grade_num = self.handle_response(temp_response_json)
+        # self.compare_grade_num(self.student.upper_term_grade_num, temp_upper_term_grade_num)
+        # self.student.upper_term_grade_num = temp_upper_term_grade_num
+        # # 获得表格
+        # self.student.upper_term_grade_table = self.get_table(self.student.upper_term_grade)
+        # # 获取第二学期的重修数据
+        # print("正在获取第二学期的重修数据")
+        # temp_response_json = self.post_grade_chongxiu_data(LOWER_TERM)
+        # # 处理响应数据
+        # self.student.lower_term_grade, temp_lower_term_grade_num = self.handle_response(temp_response_json)
+        # self.compare_grade_num(self.student.lower_term_grade_num, temp_lower_term_grade_num)
+        # self.student.lower_term_grade_num = temp_lower_term_grade_num
+        # # 获得表格
+        # self.student.lower_term_grade_table = self.get_table(self.student.lower_term_grade)
+        # 获得第一学期
+        self.student.upper_term_grade_num, self.student.upper_term_grade, self.student.upper_term_grade_table = \
+            self.get_term_grade(UPPER_TERM)
+        # 获得第二学期
+        self.student.lower_term_grade_num, self.student.lower_term_grade, self.student.lower_term_grade_table = \
+            self.get_term_grade(LOWER_TERM)
         return self.student
 
     # TODO: 重构代码
     # 获得某个学期的成绩数据
     def get_term_grade(self, term: str):
+        if term == UPPER_TERM:
+            print("正在获取第一学期的重修数据")
+        elif term == LOWER_TERM:
+            print("正在获取第二学期的重修数据")
+        else:
+            print("学期参数错误")
+            sys.exit()
         temp_response_json = self.post_grade_chongxiu_data(term)
         # 处理响应数据
-        temp_grade, temp_grade_num = self.handle_response(temp_response_json)
-
-
+        temp_term_grade, temp_upper_term_grade_num = self.handle_response(temp_response_json)
+        # 获得表格
+        temp_term_grade_table = self.get_table(temp_term_grade)
+        return temp_upper_term_grade_num, temp_term_grade, temp_term_grade_table
 
     # 处理json，返回成绩数据
     @staticmethod
@@ -186,7 +200,8 @@ class AAMSystem:
         score_data = []
         for temp_item in grade_items:
             try:
-                score_data.append([temp_item['kcmc'].split("<br>")[0], temp_item['cj'], temp_item['kch']])
+                score_data.append([temp_item['kcmc'].split("<br>")[0],
+                                   temp_item['cj'], temp_item['kch'], temp_item['xf']])
             except KeyError:
                 pass
         temp_number_of_data = len(score_data)
@@ -198,11 +213,11 @@ class AAMSystem:
     # 获得表格数据
     @staticmethod
     def get_table(data_of_scores) -> str:
-        mat = "{:30}\t{:20}\t{:20}"
-        str1 = mat.format("课程名称", "课程成绩", "课程代码") + "\n"
+        mat = "{:30}\t{:20}\t{:20}\t{:20}"
+        str1 = mat.format("课程名称", "课程成绩", "课程代码", '课程学分') + "\n"
         # print(mat.format("课程名称", "课程成绩"))
         for i in data_of_scores:
-            str1 = str1 + mat.format(i[0], i[1] , i[2]) + "\n"
+            str1 = str1 + mat.format(i[0], i[1], i[2], i[3]) + "\n"
         table = str1
         return table
 

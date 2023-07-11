@@ -30,6 +30,11 @@ class Student:
         self.lower_term_grade = None  # 下学期成绩
         self.lower_term_grade_table = None  # 下学期成绩表格
         self.school_year = None  # 学年年份
+        # 保存新增的成绩
+        self.new_grade = {
+            'upper_term': {},
+            'lower_term': {}
+        }
 
     # def __int__(self, config_json):
     #     # 定义一个暂时变量，存放查询后的成绩数目，一遍与之前的比较
@@ -111,7 +116,7 @@ class Student:
         # 遍历课程成绩列表
         for i in term_grade:
             # 将课程代码作为key，课程名称与成绩作为value，存入字典
-            grade_dic[i[2]] = [i[0], i[1]]
+            grade_dic[i[2]] = [i[0], i[1], i[3]]
 
         return grade_dic
 
@@ -138,9 +143,14 @@ class Student:
                 else:
                     # 字典里没有
                     self.term_grade_dic['upper_term'].update({temp_grade: self.upper_term_grade_dic[temp_grade]})
+                    # 保存到新增成绩列表中
+                    self.new_grade['upper_term'].update({temp_grade: self.upper_term_grade_dic[temp_grade]})
+
             except TypeError:
                 self.term_grade_dic = {'upper_term': {}, 'lower_term': {}}  # 重新创建一个字典
+                self.new_grade = {'upper_term': {}, 'lower_term': {}}  # 重新创建一个字典
                 self.term_grade_dic['upper_term'].update({temp_grade: self.upper_term_grade_dic[temp_grade]})
+                self.new_grade['upper_term'].update({temp_grade: self.upper_term_grade_dic[temp_grade]})
         self.upper_term_grade_num = len(self.term_grade_dic['upper_term'].keys())
 
         for temp_grade in self.lower_term_grade_dic:
@@ -149,54 +159,97 @@ class Student:
             else:
                 # 字典里没有
                 self.term_grade_dic['lower_term'].update({temp_grade: self.lower_term_grade_dic[temp_grade]})
+                self.new_grade['lower_term'].update({temp_grade: self.lower_term_grade_dic[temp_grade]})
         self.lower_term_grade_num = len(self.term_grade_dic['lower_term'].keys())
         return self.term_grade_dic
 
     # 获得表格数据
     @staticmethod
     def get_table(data_of_scores) -> str:
-        mat = "{:35}\t{:20}\t{:20}"
-        str1 = mat.format("课程名称", "课程代码", "课程成绩") + "\n"
+        mat = "{:35}\t{:20}\t{:20}\t{:20}"
+        str1 = mat.format("课程名称", "课程成绩", "课程代码", "课程学分") + "\n"
         # print(mat.format("课程名称", "课程成绩"))
         for i in data_of_scores:
-            str1 = str1 + mat.format(i[0], i[1], i[2]) + "\n"
+            try:
+                str1 = str1 + mat.format(i[0], i[1], i[2], i[3]) + "\n"
+            except IndexError:
+                str1 = str1 + mat.format(i[0], i[1], i[2], "无") + "\n"
         table = str1
         return table
 
     # 字典到列表的转换
     def grade_dict_display(self):
-        upper_table = self.get_term_table('upper_term')
-        lower_table = self.get_term_table('lower_term')
+        upper_table = self.get_term_table('upper_term', self.term_grade_dic)
+        lower_table = self.get_term_table('lower_term', self.term_grade_dic)
+        self.print(upper_table, lower_table)
 
         return upper_table, lower_table
 
-    def get_term_table(self, term: str):
+    # 获得上下学期的总成绩表格
+    def get_term_table(self, term: str, term_grade_dic: dict):
         if term == 'upper_term':
-            print(f"所有学年上学期所有课程(总计{len(self.term_grade_dic[term])}门)成绩如下：")
+            print(f"所有学年上学期所有课程(总计{len(term_grade_dic[term])}门)成绩如下：")
         elif term == 'lower_term':
-            print(f"所有学年下学期所有课程(总计{len(self.term_grade_dic[term])}门)成绩如下：")
+            print(f"所有学年下学期所有课程(总计{len(term_grade_dic[term])}门)成绩如下：")
         else:
             print("输入有误")
             return
         temp_list = []
-        for temp_dict in self.term_grade_dic[term]:
-            temp_list.append([self.term_grade_dic[term][temp_dict][0],
-                              temp_dict,
-                              self.term_grade_dic[term][temp_dict][1]])
+        for temp_dict in term_grade_dic[term]:
+            try:
+                temp_list.append([term_grade_dic[term][temp_dict][0],  # 课程名称
+                                  term_grade_dic[term][temp_dict][1],  # 课程成绩
+                                  temp_dict,  # 课程代码
+                                  term_grade_dic[term][temp_dict][2]])  # 课程学分
+            except IndexError:
+                temp_list.append([term_grade_dic[term][temp_dict][0],  # 课程名称
+                                  term_grade_dic[term][temp_dict][1],  # 课程成绩
+                                  temp_dict,  # 课程代码
+                                  "无"])  # 课程学分
 
         table = self.get_table(temp_list)
-        print(table)
+        # print(table)
         return table
+
+    # 展示新增成绩
+    def show_new_grade(self):
+        upper_table = ""
+        lower_table = ""
+        if len(self.new_grade['upper_term']) == 0:
+            print("上学期没有新增成绩")
+        else:
+            print(f"上学期新增{len(self.new_grade['upper_term'])}条成绩如下：")
+            upper_table = self.get_term_table('upper_term', self.new_grade)
+        if len(self.new_grade['lower_term']) == 0:
+            print("下学期没有新增成绩")
+        else:
+            print(f"下学期新增{len(self.new_grade['lower_term'])}条成绩如下：")
+            lower_table = self.get_term_table('lower_term', self.new_grade)
+        self.print(upper_table, lower_table)
+        # 刷新新增成绩
+        self.new_grade = {'upper_term': {}, 'lower_term': {}}
+        return upper_table, lower_table
 
     # TODO: 实现新增成绩查询的功能
 
     # 打印成绩
-    def print_grade(self):
-        # 打印上学期成绩
-        print('---------------------------------------------------------------------------------------')
-        print("上学期成绩：")
-        print(self.upper_term_grade_table)
-        print('---------------------------------------------------------------------------------------')
-        # 打印下学期成绩
-        print("下学期成绩：")
-        print(self.lower_term_grade_table)
+    def print_post_grade(self):
+        self.print(self.upper_term_grade_table, self.lower_term_grade_table)
+
+    # 打印
+    @staticmethod
+    def print(upper_table, lower_table):
+        if upper_table == "":
+            pass
+        else:
+            # 打印上学期成绩
+            print('---------------------------------------------------------------------------------------')
+            print("上学期成绩：")
+            print(upper_table)
+        if lower_table == "":
+            pass
+        else:
+            print('---------------------------------------------------------------------------------------')
+            # 打印下学期成绩
+            print("下学期成绩：")
+            print(lower_table)

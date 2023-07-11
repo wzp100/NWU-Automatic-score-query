@@ -13,6 +13,7 @@ def main_menu():
     print("2. 重新登录")
     print("3. 更改查询学年")
     print("4. 查询所有已查询的成绩")
+    print("5. 仅查询显示新增成绩")
     print("0. 退出程序")
     num = input("请输入你的选择：")
     print('-------------------------------------------------------------------------------------')
@@ -26,8 +27,8 @@ def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
         exit(0)
     # 成绩查询
     student = system.get_chongxiu_grade()
-    # 打印成绩
-    student.print_grade()
+    # 打印请求的成绩
+    # student.print_post_grade()
     # 保存数据
     student.save_student_info(configName)
     # 显示总成绩
@@ -37,24 +38,6 @@ def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
     # 测试学生类
     test_student(student)
 
-    # choice = input("按回车退出，或者按1重新登录，按2更改学年重新查询，按3显示所有学年的总成绩：")
-    # if choice == "1":
-    #     print("重新查询，请输入学号和密码")
-    #     system.logout()
-    #     return "1"
-    # elif choice == "2":
-    #     print("更改学年重新查询")
-    #     year = input("学年（例如2022）：")
-    #     student.change_school_year(year)
-    #     return "2"
-    # elif choice == '3':
-    #     print("查询各个学年的总成绩")
-    #     return "3"
-    # else:
-    #     print("退出程序")
-    #     # 退出系统
-    #     system.exit_system()
-    #     return "0"
 
 
 # 测试学生类
@@ -92,20 +75,31 @@ if __name__ == '__main__':
         choice = main_menu()
         if choice == "1":
             get_chongxiu_grade(system, stu, configName)
+            stu.print_post_grade()
+            stu.show_new_grade()
         elif choice == "2":
             print("重新查询，请输入学号和密码")
             system.logout()
             stu = Student()
             stu.input_stu_ID_and_password()
             get_chongxiu_grade(system, stu, configName)
+            stu.print_post_grade()
+            stu.show_new_grade()
+
         elif choice == "3":
             print("更改学年重新查询")
             year = input("学年（例如2022）：")
             stu.change_school_year(year)
             get_chongxiu_grade(system, stu, configName)
+            stu.print_post_grade()
+            stu.show_new_grade()
         elif choice == "4":
             print("查询各个学年的总成绩")
             stu.grade_dict_display()
+        elif choice == "5":
+            print("仅查询显示新增成绩")
+            get_chongxiu_grade(system, stu, configName)
+            stu.show_new_grade()
         else:
             system.exit_system()
             break
