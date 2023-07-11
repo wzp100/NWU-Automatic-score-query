@@ -1,7 +1,7 @@
 from aamsystem import AAMSystem
 from student import *
 from utils.json_utils import is_json_exist
-
+import datetime
 TEST = False
 
 
@@ -14,6 +14,7 @@ def main_menu():
     print("3. 更改查询学年")
     print("4. 查询所有已查询的成绩")
     print("5. 仅查询显示新增成绩")
+    print("6. 计算加权平均分")
     print("0. 退出程序")
     num = input("请输入你的选择：")
     print('-------------------------------------------------------------------------------------')
@@ -39,7 +40,6 @@ def get_chongxiu_grade(system: AAMSystem, student: Student, configName: str):
     test_student(student)
 
 
-
 # 测试学生类
 def test_student(student: Student):
     if TEST:
@@ -49,6 +49,24 @@ def test_student(student: Student):
 def test_aamsystem(system: AAMSystem):
     if TEST:
         system.exit_system()
+
+
+# 获取年份
+def get_year():
+    now_year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    if month < 8:
+        now_year = now_year - 1
+    return now_year
+
+
+# 获得近四年的学年列表
+def get_year_list():
+    year = get_year()
+    year_list = []
+    for i in range(4):
+        year_list.append(str(year - i))
+    return year_list
 
 
 if __name__ == '__main__':
@@ -100,6 +118,13 @@ if __name__ == '__main__':
             print("仅查询显示新增成绩")
             get_chongxiu_grade(system, stu, configName)
             stu.show_new_grade()
+        elif choice == "6":
+            print("首先会查询近四年的成绩，然后计算加权平均分")
+            four_year_list = get_year_list()
+            for year in four_year_list:
+                stu.change_school_year(year)
+                get_chongxiu_grade(system, stu, configName)
+            stu.calculate_weighted_average()
         else:
             system.exit_system()
             break

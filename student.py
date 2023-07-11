@@ -1,4 +1,4 @@
-from utils import json_utils
+from utils.json_utils import *
 
 UPPER_TERM = "3"  # 第一个学期的代码
 LOWER_TERM = "12"  # 第二个学期的代码
@@ -54,7 +54,7 @@ class Student:
 
     # 读取config_json中的信息
     def read_config(self, config_name):
-        config_json = json_utils.get_json(config_name)
+        config_json = get_json(config_name)
         try:
             self.upper_term_grade_num = config_json['upper_term_grade_num']  # 上学期成绩数目
             self.lower_term_grade_num = config_json['lower_term_grade_num']  # 下学期成绩数目
@@ -95,7 +95,7 @@ class Student:
         self.config_json['term_grade_dic'] = self.term_grade_dic
         self.config_json['upper_term_grade_num'] = self.upper_term_grade_num
         self.config_json['lower_term_grade_num'] = self.lower_term_grade_num
-        json_utils.write_back_json(self.config_json, file_name)
+        write_back_json(self.config_json, file_name)
         print("保存成功")
         return self.config_json
 
@@ -253,3 +253,53 @@ class Student:
             # 打印下学期成绩
             print("下学期成绩：")
             print(lower_table)
+
+    # 计算加权平均分
+    def calculate_weighted_average(self):
+        grade_liat = []  # 成绩列表，保存成绩与学分
+        for temp_grade in self.term_grade_dic['upper_term']:
+            try:
+                grade_liat.append([self.deal_with_grade(self.term_grade_dic['upper_term'][temp_grade][1]),
+                                   self.deal_with_grade(self.term_grade_dic['upper_term'][temp_grade][2])])
+            except IndexError:
+                print("成绩数据有误")
+                pass
+        for temp_grade in self.term_grade_dic['lower_term']:
+            try:
+                grade_liat.append([self.deal_with_grade(self.term_grade_dic['lower_term'][temp_grade][1]),
+                                   self.deal_with_grade(self.term_grade_dic['lower_term'][temp_grade][2])])
+            except IndexError:
+                print("成绩数据有误")
+                pass
+        print(grade_liat)
+        # 计算加权平均分
+        weighted_average = 0
+        total_credit = 0
+        for temp_grade in grade_liat:
+            weighted_average += temp_grade[0] * temp_grade[1]
+            total_credit += temp_grade[1]
+        weighted_average = weighted_average / total_credit
+        print(f"加权平均分为{weighted_average:.2f}")
+        return weighted_average
+
+    # 处理文字成绩
+    @staticmethod
+    def deal_with_grade(grade: str):
+        if grade == "优秀":
+            return 95.0
+        elif grade == "良好":
+            return 85.0
+        elif grade == "中等":
+            return 75.0
+        elif grade == "及格":
+            return 65.0
+        elif grade == "不及格":
+            return 0.0
+        # 判断是否为数字
+        elif grade.isdigit():
+            return float(grade)
+        # 判断是否为小数
+        elif grade.replace('.', '', 1).isdigit():
+            return float(grade)
+        else:
+            return -1  # 无法处理,返回-1

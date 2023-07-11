@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import rsa
 import time
 import urllib3
+import requests
 # 禁用安全请求警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -27,7 +28,11 @@ class Encryption:
     def get_public_key(self):
         # result = None
         # 学校的ssl证书有问题,所以verify=False
-        result = self.sessions.get(self.key_url + str(self.time), verify=False).json()
+        try:
+            result = self.sessions.get(self.key_url + str(self.time), verify=False).json()
+        except requests.exceptions.ProxyError:
+            print("网络错误,请检查网络是否开启代理（或者说是VPN，游戏加速器之类）")
+            exit(0)
         self.modules = result["modulus"]
         # 说实话 这也太那啥了 这居然是没用的 怪不得去年栽在这里
         # self.exponent = result["exponent"]
